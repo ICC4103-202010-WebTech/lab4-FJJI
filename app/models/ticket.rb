@@ -4,6 +4,7 @@ class Ticket < ApplicationRecord
 
   after_save :update_stats
   before_destroy :destoy_ticket
+  before_create :check_space
 
   private
     def update_stats
@@ -16,5 +17,14 @@ class Ticket < ApplicationRecord
     es = self.ticket_type.event.event_stat
     es.tickets_sold -= 1
     es.attendance -= 1
+  end
+  private
+  def check_space
+
+    ev = self.ticket_type.event.event_venue
+    es = self.ticket_type.event.event_stat
+    errors.add(:ev, :ev.capacity,:es.tickets_sold, message: "Event Overflow") if if ev.capacity <= es.tickets_sold
+
+    end
   end
 end
